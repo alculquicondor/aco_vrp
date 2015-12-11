@@ -8,4 +8,11 @@ set(SOURCE_FILES
 
 add_executable(example example.cpp ${SOURCE_FILES})
 
-target_link_libraries(example)
+add_executable(aco_vrp main.cpp
+        Game.cpp
+        Painter.cpp
+        ${HEADER_FILES}/Game.h
+        ${HEADER_FILES}/Painter.h
+        ${SOURCE_FILES})
+
+target_link_libraries(aco_vrp ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
