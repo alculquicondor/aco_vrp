@@ -29,7 +29,7 @@ public:
     Graph(const vector<Location> &location, size_t vehicles, size_t max_cap);
     ~Graph();
 
-    void train(int ants, int max_repetitions, double t0, bool reset=true);
+    void train(int ants, int max_repetitions, double t0=0, bool reset=false);
     vector<size_t> buildSolution(bool best=false);
 
     void showPheromones();

@@ -18,7 +18,7 @@ int main() {
 
     Graph g(loc, 2, 20);
 
-    g.train(5, 50, 100);
+    g.train(5, 50, 100, true);
     auto sol = g.buildSolution(true);
 
     g.showPheromones();
