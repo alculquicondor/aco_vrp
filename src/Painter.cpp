@@ -14,6 +14,7 @@ const vector<vector<GLfloat>> Painter::colors = {
 
 
 void Painter::drawCity(int x, int y) {
+    glColor3f(1, 1, 1);
 	glBegin(GL_POLYGON);
 	glVertex2f(x - CELL, y - CELL);
 	glVertex2f(x - CELL, y + CELL);
