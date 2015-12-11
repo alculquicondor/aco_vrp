@@ -20,7 +20,7 @@ void Graph::updatePheromone(double **pher, vector<size_t> solution) {
         curr_loc = loc;
         clients += loc != 0;
     }
-    double add = pow(clients, 3) / sqrt(total_dist);
+    double add = pow(clients, 3) / sqrt(total_dist);  // fitness function
     curr_loc = 0;
     size_t vehicle = 0;
     for (size_t loc : solution) {
