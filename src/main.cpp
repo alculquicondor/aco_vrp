@@ -17,5 +17,15 @@ int main() {
     };
 
     Graph g(loc, 2, 20);
+
+    g.train(5, 50, 100);
+    auto sol = g.buildSolution(true);
+
+    g.showPheromones();
+    cout << 0;
+    for (size_t x : sol)
+        cout << ' ' << x;
+    cout << endl;
+
     return 0;
 }
