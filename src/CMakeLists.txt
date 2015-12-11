@@ -6,3 +6,5 @@ set(SOURCE_FILES main.cpp
         ${HEADER_FILES}/Graph.h
         ${HEADER_FILES}/Location.h)
 add_executable(acovrp ${SOURCE_FILES})
+
+target_link_libraries(acovrp ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
