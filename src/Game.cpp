@@ -19,7 +19,7 @@ bool Game::is_training() {
 void Game::tick() {
     draw();
     if (training) {
-        g->train(30, 5);
+        g->train(1000, 1);
     }
 }
 
@@ -53,8 +53,8 @@ void Game::set_training(bool ok) {
         vector<Location> IG;
         for (auto a : V)
             IG.push_back({a.first, a.second, 1});
-        g = new Graph(IG, 4, 10);
-        g->train(30, 10, 100, true);
+        g = new Graph(IG, 4, 8);
+        g->train(1000, 1, 100000, true);
     }
     training = ok;
 }

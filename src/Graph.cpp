@@ -2,7 +2,7 @@
 
 
 const double Graph::alpha = 1;
-const double Graph::beta = 1.5;
+const double Graph::beta = 1.4;
 const double Graph::rho = .05;
 
 
@@ -20,7 +20,7 @@ void Graph::updatePheromone(double **pher, vector<size_t> solution) {
         curr_loc = loc;
         clients += loc != 0;
     }
-    double add = pow(clients, 3) / sqrt(total_dist);  // fitness function
+    double add = pow(clients, 4) / sqrt(total_dist);  // fitness function
     curr_loc = 0;
     size_t vehicle = 0;
     for (size_t loc : solution) {
@@ -38,7 +38,7 @@ void Graph::updatePheromone(double **pher, vector<size_t> solution) {
 void Graph::evaporate() {
     for (int i = 0; i < m; ++i)
         for (int j = 0; j < n; ++j)
-            pheromone[i][j] *= (1 - rho);
+            pheromone[i][j] *= 1 - rho;
 }
 
 
@@ -53,7 +53,7 @@ Graph::Graph(const vector<Location> &location, size_t vehicles, size_t max_cap) 
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < i; ++j)
             distance[i][j] = distance[j][i] = location[i].distance(location[j]);
-        distance[i][i] = 0;
+        distance[i][i] = 1e300;
     }
 
     pheromone = new double*[m];
