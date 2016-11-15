@@ -29,7 +29,7 @@ void process_Normal_Keys(unsigned char key, int x, int y) {
 
 void timer(int=0) {
    display();
-   glutTimerFunc(10, timer, 0);
+   glutTimerFunc(1, timer, 0);
 }
 
 
