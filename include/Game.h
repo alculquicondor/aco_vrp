@@ -2,6 +2,7 @@
 #define ACOVRP_GAME_H
 
 #include <fstream>
+#include <iomanip>
 
 #include "Graph.h"
 #include "Painter.h"
@@ -16,6 +17,7 @@ private:
     Graph *g;
     bool training;
     vector<Location> locations;
+    std::size_t iterations;
 
 public:
     Game();
