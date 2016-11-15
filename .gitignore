@@ -27,5 +27,8 @@
 *.out
 *.app
 
+# Data
+*.txt
+
 # CLion
 .idea/

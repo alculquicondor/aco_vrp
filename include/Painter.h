@@ -6,8 +6,10 @@
 #include <GL/gl.h>
 #include <GL/glut.h>
 
+#include "Location.h"
+
+
 using std::vector;
-using std::pair;
 
 class Painter {
 private:
@@ -16,7 +18,7 @@ private:
 
 public:
     void drawCity(int x, int y);
-    void drawRoute(pair<int, int> A, pair<int, int> B, int col);
+    void drawRoute(const Location &A, const Location &B, int col);
 };
 
 #endif //ACOVRP_PAINTER_H

@@ -1,4 +1,5 @@
 #include "Graph.h"
+#include <cassert>
 
 
 const double Graph::alpha = 1;
@@ -7,12 +8,13 @@ const double Graph::rho = .05;
 
 
 double Graph::probability(size_t i, size_t j, bool vehicle) {
-    return pow(pheromone[vehicle ? i : vehicles + i][j], alpha) *
+    double prob = pow(pheromone[vehicle ? i : vehicles + i][j], alpha) *
            pow(1. / distance[vehicle ? 0 : i][j], beta);
+    assert(prob < 1e300);
+    return prob;
 }
 
-
-void Graph::updatePheromone(double **pher, vector<size_t> solution) {
+double Graph::getFitness(vector<size_t> solution) {
     double total_dist = 0;
     size_t curr_loc = 0, clients = 0;
     for (size_t loc : solution) {
@@ -20,8 +22,12 @@ void Graph::updatePheromone(double **pher, vector<size_t> solution) {
         curr_loc = loc;
         clients += loc != 0;
     }
-    double add = pow(clients, 4) / sqrt(total_dist);  // fitness function
-    curr_loc = 0;
+    return sqrt(clients) * (1 + 1 / log(total_dist));
+}
+
+
+void Graph::updatePheromone(double **pher, vector<size_t> solution, double add) {
+    size_t curr_loc = 0;
     size_t vehicle = 0;
     for (size_t loc : solution) {
         if (curr_loc == 0) {
@@ -44,7 +50,7 @@ void Graph::evaporate() {
 
 Graph::Graph(const vector<Location> &location, size_t vehicles, size_t max_cap) :
         n(location.size()), vehicles(vehicles), max_cap(max_cap), location(location), m(n + vehicles),
-        gen(std::random_device()()) {
+        gen(std::random_device()()), bestFitness(0) {
     distance = new double*[n];
     distance[0] = new double[n * n];
     for (int i = 1; i < n; ++i)
@@ -86,7 +92,12 @@ void Graph::train(int ants, int max_repetitions, double t0, bool reset) {
         std::copy(pheromone[0], pheromone[0] + m * n, tmp[0]);
         for (int a = 0; a < ants; ++a) {
             auto solution = buildSolution();
-            updatePheromone(tmp, solution);
+            double fitness = getFitness(solution);
+            updatePheromone(tmp, solution, fitness);
+            if (fitness > bestFitness) {
+                bestSolution = solution;
+                bestFitness = fitness;
+            }
         }
         std::copy(tmp[0], tmp[0] + m * n, pheromone[0]);
     }
@@ -96,7 +107,7 @@ void Graph::train(int ants, int max_repetitions, double t0, bool reset) {
 }
 
 
-vector<size_t> Graph::buildSolution(bool best) {
+vector<size_t> Graph::buildSolution() {
     vector<size_t> solution;
     vector<bool> seen(n);
     size_t curr_loc = 0, clients = 0, vehicle = 0, cap = max_cap;
@@ -104,50 +115,29 @@ vector<size_t> Graph::buildSolution(bool best) {
         seen[curr_loc] = true;
         vector<size_t> options;
         vector<double> distribution{0};
-        if (best) {
-            double max_prob = -1, prob;
-            size_t nxt = 0;
-            if (curr_loc == 0) {
-                for (size_t j = 1; j < n; ++j)
-                    if (not seen[j] and location[j].weight <= cap) {
-                        prob = probability(vehicle, j, true);
-                        if (prob > max_prob) {
-                            nxt = j;
-                            max_prob = prob;
-                        }
-                    }
-            } else {
-                max_prob = probability(curr_loc, 0);
-                for (size_t j = 1; j < n; ++j)
-                    if (not seen[j] and location[j].weight <= cap) {
-                        prob = probability(curr_loc, j);
-                        if (prob > max_prob) {
-                            nxt = j;
-                            max_prob = prob;
-                        }
-                    }
-            }
-            curr_loc = nxt;
+        if (curr_loc == 0) {
+            for (size_t j = 1; j < n; ++j)
+                if (not seen[j] and location[j].weight <= cap) {
+                    options.push_back(j);
+                    distribution.push_back(distribution.back() + probability(vehicle, j, true));
+                }
         } else {
-            if (curr_loc == 0) {
-                for (size_t j = 1; j < n; ++j)
-                    if (not seen[j] and location[j].weight <= cap) {
-                        options.push_back(j);
-                        distribution.push_back(distribution.back() + probability(vehicle, j, true));
-                    }
-            } else {
+            bool has_exit = false;
+            for (size_t j = 1; j < n; ++j)
+                if (not seen[j] and location[j].weight <= cap) {
+                    options.push_back(j);
+                    distribution.push_back(distribution.back() + probability(curr_loc, j));
+                    has_exit = true;
+                }
+            if (not has_exit) {  // return to base
                 options.push_back(0);
                 distribution.push_back(distribution.back() + probability(curr_loc, 0));
-                for (size_t j = 1; j < n; ++j)
-                    if (not seen[j] and location[j].weight <= cap) {
-                        options.push_back(j);
-                        distribution.push_back(distribution.back() + probability(curr_loc, j));
-                    }
             }
-            curr_loc = options[std::upper_bound(distribution.begin(), distribution.end(),
-                                                std::uniform_real_distribution<>(0., distribution.back())(gen))
-                               - distribution.begin() - 1];
         }
+        curr_loc = options[std::upper_bound(distribution.begin(), distribution.end(),
+                                            std::uniform_real_distribution<>(0., distribution.back())(gen))
+                           - distribution.begin() - 1];
+        assert(curr_loc < location.size());
         solution.push_back(curr_loc);
         cap -= location[curr_loc].weight;
         if (curr_loc == 0) {

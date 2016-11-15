@@ -13,30 +13,13 @@ void display() {
 }
 
 
-void mouse(int button, int state, int x, int y) {
-	if (state == GLUT_UP) {
-		switch (button) {
-			case GLUT_LEFT_BUTTON:
-				if (!game.is_training())
-				   game.add(x, y);
-				break;
-            default: break;
-		}
-		glutPostRedisplay();
-	}
-}
-
-
 void process_Normal_Keys(unsigned char key, int x, int y) {
 	switch (key) {
-		case 'n': 
-		        game = Game();	
-			break;
-		case 'c': 
-			game.set_training( false ) ;
+		case 'c':
+			game.set_training(false) ;
 			break;
 		case 's': 
-			game.set_training( true ) ;
+			game.set_training(true) ;
 			break;
         default: break;
 	}
@@ -46,7 +29,7 @@ void process_Normal_Keys(unsigned char key, int x, int y) {
 
 void timer(int=0) {
    display();
-   glutTimerFunc(60, timer, 0);
+   glutTimerFunc(10, timer, 0);
 }
 
 
@@ -62,8 +45,13 @@ int main(int argc, char **argv) {
 	glLoadIdentity();
 	glOrtho(0, width, height, 0, -1.0, 1.0);
 	glutDisplayFunc(display);
-	glutMouseFunc(mouse);
     glutKeyboardFunc(process_Normal_Keys);
 	timer();
+
+	if (argc < 2) {
+		std::cerr << "input file missing" << std::endl;
+	}
+	game.load_data(argv[1]);
+
 	glutMainLoop();
 }

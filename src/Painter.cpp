@@ -25,10 +25,10 @@ void Painter::drawCity(int x, int y) {
 }
 
 
-void Painter::drawRoute(pair<int, int > A , pair<int, int> B, int col ) {
+void Painter::drawRoute(const Location &A, const Location &B, int col) {
 	glColor3f(colors[col][0], colors[col][1], colors[col][2]);
 	glBegin(GL_LINES);
-	glVertex2f(A.first, A.second);
-	glVertex2f(B.first, B.second);
+	glVertex2f(A.x, A.y);
+	glVertex2f(B.x, B.y);
 	glEnd();
 }

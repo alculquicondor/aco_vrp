@@ -1,7 +1,7 @@
 #ifndef ACOVRP_GAME_H
 #define ACOVRP_GAME_H
 
-#include <utility>
+#include <fstream>
 
 #include "Graph.h"
 #include "Painter.h"
@@ -15,16 +15,15 @@ class Game
 private:
     Graph *g;
     bool training;
-    vector<pair<int, int>>  V ;
+    vector<Location> locations;
 
 public:
     Game();
     ~Game();
 
     void draw();
-    void add(int x, int y);
+    void load_data(std::string filename);
     void set_training(bool ok );
-    bool is_training();
     void tick();
 };
 
