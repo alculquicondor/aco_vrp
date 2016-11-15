@@ -4,7 +4,7 @@
 
 const double Graph::alpha = 1;
 const double Graph::beta = 1.4;
-const double Graph::rho = .05;
+const double Graph::rho = .1;
 
 
 double Graph::probability(size_t i, size_t j, bool vehicle) {

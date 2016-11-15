@@ -14,10 +14,9 @@ using std::vector;
 class Painter {
 private:
     static const vector<vector<GLfloat>> colors;
-    static const int CELL;
 
 public:
-    void drawCity(int x, int y);
+    void drawCity(const Location &loc);
     void drawRoute(const Location &A, const Location &B, int col);
 };
 

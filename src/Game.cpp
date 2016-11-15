@@ -22,7 +22,7 @@ void Game::tick() {
 void Game::draw() {
     Painter p;
     for (auto &x : locations)
-        p.drawCity(x.x, x.y);
+        p.drawCity(x);
 
     if (training) {
         auto sol = g->getBestSolution();
@@ -50,7 +50,7 @@ void Game::load_data(std::string filename) {
 
 void Game::set_training(bool ok) {
     if (not training and ok){
-        g = new Graph(locations, 4, 20);
+        g = new Graph(locations, 5, 20);
         g->train(1000, 1, 100000, true);
     }
     training = ok;

@@ -1,8 +1,6 @@
 #include "Painter.h"
 
 
-const int Painter::CELL = 2;
-
 const vector<vector<GLfloat>> Painter::colors = {
         {1, 0, 0},
         {0, 1, 0},
@@ -13,14 +11,14 @@ const vector<vector<GLfloat>> Painter::colors = {
 };
 
 
-void Painter::drawCity(int x, int y) {
+void Painter::drawCity(const Location &loc) {
     glColor3f(1, 1, 1);
 	glBegin(GL_POLYGON);
-	glVertex2f(x - CELL, y - CELL);
-	glVertex2f(x - CELL, y + CELL);
-	glVertex2f(x + CELL, y + CELL);
-	glVertex2f(x + CELL, y - CELL);
-	glVertex2f(x - CELL, y - CELL);
+	glVertex2f(loc.x -  sqrt(loc.weight + 1), loc.y - sqrt(loc.weight + 1));
+	glVertex2f(loc.x -  sqrt(loc.weight + 1), loc.y + sqrt(loc.weight + 1));
+	glVertex2f(loc.x +  sqrt(loc.weight + 1), loc.y + sqrt(loc.weight + 1));
+	glVertex2f(loc.x +  sqrt(loc.weight + 1), loc.y - sqrt(loc.weight + 1));
+	glVertex2f(loc.x -  sqrt(loc.weight + 1), loc.y - sqrt(loc.weight + 1));
 	glEnd();
 }
 
