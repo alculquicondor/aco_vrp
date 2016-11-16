@@ -52,19 +52,26 @@ void Game::draw() {
 void Game::load_data(std::string filename) {
     std::ifstream input(filename);
     std::size_t n;
-    input >> n;
+
+    input >> n;  // number of locations
     locations.resize(n);
-    for (auto &x : locations) {
+    for (auto &x : locations)
         input >> x.x >> x.y >> x.weight;
-    }
+
+    input >> n;  // number of vehicles
+    vehicles.resize(n);
+    for (auto &x: vehicles)
+        input >> x;
 }
 
 void Game::set_training(bool ok) {
     if (not training and ok){
-        std::size_t vehicles = 5, vehicle_cap = 50;
-        g = new Graph(locations, vehicles, vehicle_cap);
+        std::size_t total_cap = 0;
+        for (int x : vehicles)
+            total_cap += x;
+        g = new Graph(locations, vehicles);
         iterations = 0;
-        g->train(1000, 1, vehicles * vehicle_cap, true);
+        g->train(1000, 1, total_cap, true);
     }
     training = ok;
 }

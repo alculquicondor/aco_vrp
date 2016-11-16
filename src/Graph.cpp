@@ -8,7 +8,7 @@ const double Graph::rho = .12;
 
 
 double Graph::probability(size_t i, size_t j, bool vehicle) {
-    double prob = pow(pheromone[vehicle ? i : vehicles + i][j], alpha) *
+    double prob = pow(pheromone[vehicle ? i : vehicles.size() + i][j], alpha) *
            pow(1. / distance[vehicle ? 0 : i][j], beta);
     assert(prob < 1e300);
     return prob;
@@ -35,7 +35,7 @@ void Graph::updatePheromone(double **pher, vector<size_t> solution, double add) 
             pher[vehicle][loc] += add;
             ++vehicle;
         } else {
-            pher[vehicles + curr_loc][loc] += add;
+            pher[vehicles.size() + curr_loc][loc] += add;
         }
         curr_loc = loc;
     }
@@ -49,8 +49,8 @@ void Graph::evaporate() {
 }
 
 
-Graph::Graph(const vector<Location> &location, size_t vehicles, size_t max_cap) :
-        n(location.size()), vehicles(vehicles), max_cap(max_cap), location(location), m(n + vehicles),
+Graph::Graph(const vector<Location> &location, const vector<size_t> &vehicles) :
+        n(location.size()), vehicles(vehicles), location(location), m(n + vehicles.size()),
         gen(std::random_device()()), bestFitness(0) {
     distance = new double*[n];
     distance[0] = new double[n * n];
@@ -115,8 +115,8 @@ void Graph::train(int ants, int max_repetitions, double t0, bool reset) {
 vector<size_t> Graph::buildSolution() {
     vector<size_t> solution;
     vector<bool> seen(n);
-    size_t curr_loc = 0, clients = 0, vehicle = 0, cap = max_cap;
-    for (int i = 0; clients < n - 1 and vehicle < vehicles; ++i) {
+    size_t curr_loc = 0, clients = 0, vehicle = 0, cap = vehicles[0];
+    for (int i = 0; clients < n - 1 and vehicle < vehicles.size(); ++i) {
         seen[curr_loc] = true;
         vector<size_t> options;
         vector<double> distribution{0};
@@ -146,8 +146,8 @@ vector<size_t> Graph::buildSolution() {
         solution.push_back(curr_loc);
         cap -= location[curr_loc].weight;
         if (curr_loc == 0) {
-            ++vehicle;
-            cap = max_cap;
+            if (++vehicle < vehicles.size())
+                cap = vehicles[vehicle];
         } else {
             ++clients;
         }

@@ -16,8 +16,9 @@ class Graph {
 private:
     static const double alpha, beta, rho;
 
-    size_t n, vehicles, max_cap, m;
+    size_t n, m;
     vector<Location> location;
+    vector<std::size_t> vehicles;
     double **distance, **pheromone, **tmp_pheromone;
     double bestFitness;
     vector<size_t> bestSolution;
@@ -33,7 +34,7 @@ private:
     void evaporate();
 
 public:
-    Graph(const vector<Location> &location, size_t vehicles, size_t max_cap);
+    Graph(const vector<Location> &location, const vector<size_t> &vehicles);
     ~Graph();
 
     void train(int ants, int max_repetitions, double t0=0, bool reset=false);

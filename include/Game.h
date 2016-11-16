@@ -17,6 +17,7 @@ private:
     Graph *g;
     bool training;
     vector<Location> locations;
+    vector<std::size_t> vehicles;
     std::size_t iterations;
 
 public:
