@@ -18,7 +18,7 @@ void process_Normal_Keys(unsigned char key, int x, int y) {
 		case 'c':
 			game.set_training(false) ;
 			break;
-		case 's': 
+		case 's':
 			game.set_training(true) ;
 			break;
         default: break;

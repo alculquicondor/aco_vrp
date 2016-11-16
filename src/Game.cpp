@@ -16,6 +16,9 @@ void Game::tick() {
     if (training) {
         g->train(1000, 1);
         ++iterations;
+        if (iterations == 50) {
+            set_training(false);
+        }
     }
 }
 
@@ -25,23 +28,24 @@ void Game::draw() {
     for (auto &x : locations)
         p.drawCity(x);
 
-    if (training) {
-        auto sol = g->getBestSolution();
-        size_t prev = 0;
-        int col = 0, attended = 0;
-        double distance = 0;
-        for (size_t cur : sol) {
-            p.drawRoute(locations[prev], locations[cur], col);
-            if (cur == 0)
-                ++col;
-            else
-                attended += locations[cur].weight;
-            distance += locations[prev].distance(locations[cur]);
-            prev = cur;
-        }
-        std::cout << std::setw(9) << iterations << ": " << std::setw(4) << attended << ' ' << std::fixed << std::setprecision(2)
-                  << distance << std::endl;
+    if (g == nullptr)
+        return;
+    auto sol = g->getBestSolution();
+    size_t prev = 0;
+    int col = 0, attended = 0;
+    double distance = 0;
+    for (size_t cur : sol) {
+        p.drawRoute(locations[prev], locations[cur], col);
+        if (cur == 0)
+            ++col;
+        else
+            attended += locations[cur].weight;
+        distance += locations[prev].distance(locations[cur]);
+        prev = cur;
     }
+    if (training)
+        std::cout << std::setw(9) << iterations << ": " << std::setw(4) << attended << ' '
+                  << std::fixed << std::setprecision(2) << distance << std::endl;
 }
 
 
@@ -57,9 +61,10 @@ void Game::load_data(std::string filename) {
 
 void Game::set_training(bool ok) {
     if (not training and ok){
-        g = new Graph(locations, 5, 20);
+        std::size_t vehicles = 5, vehicle_cap = 50;
+        g = new Graph(locations, vehicles, vehicle_cap);
         iterations = 0;
-        g->train(1000, 1, 100000, true);
+        g->train(1000, 1, vehicles * vehicle_cap, true);
     }
     training = ok;
 }

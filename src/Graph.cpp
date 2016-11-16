@@ -3,8 +3,8 @@
 
 
 const double Graph::alpha = 1;
-const double Graph::beta = 1.4;
-const double Graph::rho = .1;
+const double Graph::beta = 1.6;
+const double Graph::rho = .12;
 
 
 double Graph::probability(size_t i, size_t j, bool vehicle) {
@@ -16,13 +16,14 @@ double Graph::probability(size_t i, size_t j, bool vehicle) {
 
 double Graph::getFitness(vector<size_t> solution) {
     double total_dist = 0;
-    size_t curr_loc = 0, clients = 0;
+    size_t curr_loc = 0, weight = 0;
     for (size_t loc : solution) {
         total_dist += distance[loc][curr_loc];
         curr_loc = loc;
-        clients += loc != 0;
+        if (loc != 0)
+            weight += location[loc].weight;
     }
-    return sqrt(clients) * (1 + 1 / log(total_dist));
+    return sqrt(weight) * (1 + 1 / log(total_dist));
 }
 
 
@@ -63,9 +64,13 @@ Graph::Graph(const vector<Location> &location, size_t vehicles, size_t max_cap) 
     }
 
     pheromone = new double*[m];
+    tmp_pheromone = new double*[m];
     pheromone[0] = new double[m * n];
-    for (int i = 1; i < m; ++i)
+    tmp_pheromone[0] = new double[m * n];
+    for (int i = 1; i < m; ++i) {
         pheromone[i] = pheromone[i - 1] + n;
+        tmp_pheromone[i] = tmp_pheromone[i - 1] + n;
+    }
 }
 
 
@@ -75,6 +80,9 @@ Graph::~Graph() {
 
     delete[] pheromone[0];
     delete[] pheromone;
+
+    delete[] tmp_pheromone[0];
+    delete[] tmp_pheromone;
 }
 
 
@@ -82,28 +90,25 @@ void Graph::train(int ants, int max_repetitions, double t0, bool reset) {
     if (reset)
         std::fill(pheromone[0], pheromone[0] + m * n, t0);
 
-    double **tmp = new double*[m];
-    tmp[0] = new double[m * n];
-    for (int i = 1; i < m; ++i)
-        tmp[i] = tmp[i - 1] + n;
-
     for (int r = 0; r < max_repetitions; ++r) {
+        double total_pheromone = 0;
+        for (int i = 0; i < m; ++i)
+            for (int j = 0; j < m; ++j)
+                total_pheromone += pheromone[i][j];
+        std::cout << "pheromone: " << total_pheromone << std::endl;
         evaporate();
-        std::copy(pheromone[0], pheromone[0] + m * n, tmp[0]);
+        std::copy(pheromone[0], pheromone[0] + m * n, tmp_pheromone[0]);
         for (int a = 0; a < ants; ++a) {
             auto solution = buildSolution();
             double fitness = getFitness(solution);
-            updatePheromone(tmp, solution, fitness);
+            updatePheromone(tmp_pheromone, solution, fitness / sqrt(ants));
             if (fitness > bestFitness) {
                 bestSolution = solution;
                 bestFitness = fitness;
             }
         }
-        std::copy(tmp[0], tmp[0] + m * n, pheromone[0]);
+        std::copy(tmp_pheromone[0], tmp_pheromone[0] + m * n, pheromone[0]);
     }
-
-    delete[] tmp[0];
-    delete[] tmp;
 }
 
 

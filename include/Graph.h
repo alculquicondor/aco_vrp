@@ -18,7 +18,7 @@ private:
 
     size_t n, vehicles, max_cap, m;
     vector<Location> location;
-    double **distance, **pheromone;
+    double **distance, **pheromone, **tmp_pheromone;
     double bestFitness;
     vector<size_t> bestSolution;
 
