@@ -44,7 +44,7 @@ void Game::draw() {
         prev = cur;
     }
     if (training)
-        std::cout << std::setw(9) << iterations << ": " << std::setw(4) << attended << ' '
+        std::cout << col << ' ' << std::setw(9) << iterations << ": " << std::setw(4) << attended << ' '
                   << std::fixed << std::setprecision(2) << distance << std::endl;
 }
 
