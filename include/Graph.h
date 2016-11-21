@@ -13,6 +13,9 @@ using std::vector;
 
 
 class Graph {
+public:
+    using Solution = std::vector<std::pair<size_t, size_t>>;
+
 private:
     static const double alpha, beta, rho;
 
@@ -21,15 +24,15 @@ private:
     vector<std::size_t> vehicles;
     double **distance, **pheromone, **tmp_pheromone;
     double bestFitness;
-    vector<size_t> bestSolution;
+    Solution bestSolution;
 
     std::mt19937 gen;
 
     double probability(size_t i, size_t j, bool vehicle = false);
 
-    double getFitness(vector<size_t> solution);
+    double getFitness(const Solution &solution);
 
-    void updatePheromone(double **pher, vector<size_t> solution, double add);
+    void updatePheromone(double **pher, const Solution &solution, double add);
 
     void evaporate();
 
@@ -38,9 +41,9 @@ public:
     ~Graph();
 
     void train(int ants, int max_repetitions, double t0=0, bool reset=false);
-    vector<size_t> buildSolution();
+    Solution buildSolution();
 
-    vector<size_t> getBestSolution() const {
+    Solution getBestSolution() const {
         return bestSolution;
     }
 

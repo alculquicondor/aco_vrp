@@ -14,30 +14,30 @@ double Graph::probability(size_t i, size_t j, bool vehicle) {
     return prob;
 }
 
-double Graph::getFitness(vector<size_t> solution) {
+double Graph::getFitness(const Solution &solution) {
     double total_dist = 0;
     size_t curr_loc = 0, weight = 0;
-    for (size_t loc : solution) {
-        total_dist += distance[loc][curr_loc];
-        curr_loc = loc;
-        if (loc != 0)
-            weight += location[loc].weight;
+    for (auto loc : solution) {
+        total_dist += distance[loc.first][curr_loc];
+        curr_loc = loc.first;
+        if (loc.first != 0)
+            weight += location[loc.first].weight;
     }
     return sqrt(weight) * (1 + 1 / log(total_dist));
 }
 
 
-void Graph::updatePheromone(double **pher, vector<size_t> solution, double add) {
+void Graph::updatePheromone(double **pher, const Solution &solution, double add) {
     size_t curr_loc = 0;
     size_t vehicle = 0;
-    for (size_t loc : solution) {
+    for (auto loc : solution) {
         if (curr_loc == 0) {
-            pher[vehicle][loc] += add;
+            pher[vehicle][loc.first] += add;
             ++vehicle;
         } else {
-            pher[vehicles.size() + curr_loc][loc] += add;
+            pher[vehicles.size() + curr_loc][loc.first] += add;
         }
-        curr_loc = loc;
+        curr_loc = loc.first;
     }
 }
 
@@ -60,7 +60,7 @@ Graph::Graph(const vector<Location> &location, const vector<size_t> &vehicles) :
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < i; ++j)
             distance[i][j] = distance[j][i] = location[i].distance(location[j]);
-        distance[i][i] = 1e50;
+        distance[i][i] = 50;  // to allow to return to base
     }
 
     pheromone = new double*[m];
@@ -112,8 +112,8 @@ void Graph::train(int ants, int max_repetitions, double t0, bool reset) {
 }
 
 
-vector<size_t> Graph::buildSolution() {
-    vector<size_t> solution;
+typename Graph::Solution Graph::buildSolution() {
+    Solution solution;
     vector<bool> seen(n);
     size_t curr_loc = 0, prev_loc = 0, clients = 0, vehicle = 0, cap = vehicles[0];
     for (int i = 0; clients < n - 1 and vehicle < vehicles.size(); ++i) {
@@ -133,7 +133,7 @@ vector<size_t> Graph::buildSolution() {
                                             std::uniform_real_distribution<>(0., distribution.back())(gen))
                            - distribution.begin() - 1];
         assert(curr_loc < location.size());
-        solution.push_back(curr_loc);
+        solution.push_back({curr_loc, vehicle});
         cap -= location[curr_loc].weight;
         if (curr_loc == 0) {
             if (prev_loc == 0 and ++vehicle < vehicles.size()) {
@@ -145,8 +145,8 @@ vector<size_t> Graph::buildSolution() {
             ++clients;
         }
     }
-    if (solution.back() != 0)
-        solution.push_back(0);
+    if (solution.back().first != 0)
+        solution.push_back({0, vehicle});
     return solution;
 }
 

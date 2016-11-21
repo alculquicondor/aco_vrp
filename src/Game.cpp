@@ -16,7 +16,7 @@ void Game::tick() {
     if (training) {
         g->train(1000, 1);
         ++iterations;
-        if (iterations == 50) {
+        if (iterations == 100) {
             set_training(false);
         }
     }
@@ -34,14 +34,12 @@ void Game::draw() {
     size_t prev = 0;
     int col = 0, attended = 0;
     double distance = 0;
-    for (size_t cur : sol) {
-        p.drawRoute(locations[prev], locations[cur], col);
-        if (cur == 0)
-            ++col;
-        else
-            attended += locations[cur].weight;
-        distance += locations[prev].distance(locations[cur]);
-        prev = cur;
+    for (auto cur : sol) {
+        p.drawRoute(locations[prev], locations[cur.first], cur.second);
+        if (cur.first != 0)
+            attended += locations[cur.first].weight;
+        distance += locations[prev].distance(locations[cur.first]);
+        prev = cur.first;
     }
     if (training)
         std::cout << col << ' ' << std::setw(9) << iterations << ": " << std::setw(4) << attended << ' '
@@ -66,12 +64,12 @@ void Game::load_data(std::string filename) {
 
 void Game::set_training(bool ok) {
     if (not training and ok){
-        std::size_t total_cap = 0;
-        for (int x : vehicles)
-            total_cap += x;
+        std::size_t total_weight = 0;
+        for (auto x : locations)
+            total_weight += x.weight;
         g = new Graph(locations, vehicles);
         iterations = 0;
-        g->train(1000, 1, total_cap, true);
+        g->train(1000, 1, sqrt(total_weight), true);
     }
     training = ok;
 }

@@ -17,7 +17,7 @@ private:
 
 public:
     void drawCity(const Location &loc);
-    void drawRoute(const Location &A, const Location &B, int col);
+    void drawRoute(const Location &A, const Location &B, size_t col);
 };
 
 #endif //ACOVRP_PAINTER_H

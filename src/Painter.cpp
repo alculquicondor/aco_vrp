@@ -2,12 +2,12 @@
 
 
 const vector<vector<GLfloat>> Painter::colors = {
-        {1, 0, 0},
-        {0, 1, 0},
-        {0, 0, 1},
-        {1, 1, 0},
-        {0, 1, 1},
-        {1, 0, 1},
+        {1, 0, 0},  // 0: red
+        {0, 1, 0},  // 1: green
+        {0, 0, 1},  // 2: blue
+        {1, 1, 0},  // 3: yellow
+        {0, 1, 1},  // 4: cyan
+        {1, 0, 1},  // 5: magenta
         {.5, .5, 1},
         {1, .5, .5},
         {.5, 1, .5},
@@ -38,7 +38,7 @@ void Painter::drawCity(const Location &loc) {
 }
 
 
-void Painter::drawRoute(const Location &A, const Location &B, int col) {
+void Painter::drawRoute(const Location &A, const Location &B, size_t col) {
 	glColor3f(colors[col][0], colors[col][1], colors[col][2]);
 	glBegin(GL_LINES);
 	glVertex2f(A.x, A.y);
