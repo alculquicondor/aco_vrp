@@ -102,7 +102,6 @@ void Graph::train(int ants, int max_repetitions, double t0, bool reset) {
         for (int i = 0; i < m; ++i)
             for (int j = 0; j < m; ++j)
                 total_pheromone += pheromone[i][j];
-        std::cout << "pheromone: " << total_pheromone << std::endl;
         evaporate();
         std::copy(pheromone[0], pheromone[0] + m * n, tmp_pheromone[0]);
         for (int a = 0; a < ants; ++a) {

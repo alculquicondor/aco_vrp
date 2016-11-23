@@ -17,11 +17,12 @@ Game::~Game() {
 
 
 void Game::tick() {
+    static size_t trainingSteps = 3;
     draw();
     if (training) {
-        g->train(ants, 1);
-        ++iterations;
-        if (iterations == 2000) {
+        g->train(ants, trainingSteps);
+        iterations += trainingSteps;
+        if (iterations > 5000) {
             set_training(false);
         }
     }
@@ -73,7 +74,7 @@ void Game::set_training(bool ok) {
     if (not training and ok){
         double estimated_distance = locations.size() * sqrt(height * height + width * width) / 2;
         double total_weight = 0;
-        g = new Graph(locations, vehicles, 5e3);
+        g = new Graph(locations, vehicles, 4e3);
         for (auto &x : locations)
             total_weight += x.weight;
         iterations = 0;
