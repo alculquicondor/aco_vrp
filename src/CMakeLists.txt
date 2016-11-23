@@ -6,8 +6,6 @@ set(SOURCE_FILES
         ${HEADER_FILES}/Graph.h
         ${HEADER_FILES}/Location.h)
 
-add_executable(example example.cpp ${SOURCE_FILES})
-
 add_executable(aco_vrp main.cpp
         Game.cpp
         Painter.cpp
