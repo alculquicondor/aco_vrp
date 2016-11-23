@@ -2,17 +2,24 @@
 #include <cassert>
 
 
-const double Graph::alpha = 1;
-const double Graph::beta = 1.6;
-const double Graph::rho = .12;
+const double Graph::alpha = .5;
+const double Graph::beta = 3;
+const double Graph::rho = .1;
 
 
 double Graph::probability(size_t i, size_t j, bool vehicle) {
     double prob = pow(pheromone[vehicle ? i : vehicles.size() + i][j], alpha) *
-            pow(1. / distance[vehicle ? 0 : i][j], beta);
+            pow(1. / log(distance[vehicle ? 0 : i][j]), beta);
+
     assert(prob < 1e300);
     return prob;
 }
+
+
+double Graph::getFitness(double total_weight, double total_distance) {
+    return sqrt(total_weight) + (1 + 1 / total_distance);
+}
+
 
 double Graph::getFitness(const Solution &solution) {
     double total_dist = 0;
@@ -23,7 +30,7 @@ double Graph::getFitness(const Solution &solution) {
         if (loc.first != 0)
             weight += location[loc.first].weight;
     }
-    return sqrt(weight) * (1 + 1 / log(total_dist));
+    return getFitness(weight, total_dist);
 }
 
 
@@ -49,9 +56,9 @@ void Graph::evaporate() {
 }
 
 
-Graph::Graph(const vector<Location> &location, const vector<size_t> &vehicles) :
+Graph::Graph(const vector<Location> &location, const vector<size_t> &vehicles, double maxDist) :
         n(location.size()), vehicles(vehicles), location(location), m(n + vehicles.size()),
-        gen(std::random_device()()), bestFitness(0) {
+        maxDist(maxDist), gen(std::random_device()()), bestFitness(0) {
     distance = new double*[n];
     distance[0] = new double[n * n];
     for (int i = 1; i < n; ++i)
@@ -101,7 +108,7 @@ void Graph::train(int ants, int max_repetitions, double t0, bool reset) {
         for (int a = 0; a < ants; ++a) {
             auto solution = buildSolution();
             double fitness = getFitness(solution);
-            updatePheromone(tmp_pheromone, solution, fitness / sqrt(ants));
+            updatePheromone(tmp_pheromone, solution, fitness / ants);
             if (fitness > bestFitness) {
                 bestSolution = solution;
                 bestFitness = fitness;
@@ -116,28 +123,39 @@ typename Graph::Solution Graph::buildSolution() {
     Solution solution;
     vector<bool> seen(n);
     size_t curr_loc = 0, prev_loc = 0, clients = 0, vehicle = 0, cap = vehicles[0];
-    for (int i = 0; clients < n - 1 and vehicle < vehicles.size(); ++i) {
+    double vehicle_dist = 0;
+    while (clients < n - 1 and vehicle < vehicles.size()) {
         seen[curr_loc] = true;
         vector<size_t> options;
-        vector<double> distribution{0};
-        for (size_t j = 1; j < n; ++j)
-            if (not seen[j] and location[j].weight <= cap) {
-                options.push_back(j);
-                distribution.push_back(distribution.back() + probability(curr_loc == 0 ? vehicle : curr_loc, j, curr_loc == 0));
-            }
+        vector<double> distribution;
+        if (vehicle_dist < maxDist) {
+            for (size_t j = 1; j < n; ++j)
+                if (not seen[j] and location[j].weight <= cap) {
+                    options.push_back(j);
+                    distribution.push_back(probability(curr_loc == 0 ? vehicle : curr_loc, j, curr_loc == 0));
+                }
+        }
         options.push_back(0);
-        distribution.push_back(distribution.back() + probability(curr_loc == 0 ? vehicle : curr_loc, 0, curr_loc == 0));
+        distribution.push_back(probability(curr_loc == 0 ? vehicle : curr_loc, 0, curr_loc == 0));
+
+        for (size_t k = 1; k < distribution.size(); ++k)
+            distribution[k] += distribution[k - 1];
 
         prev_loc = curr_loc;
         curr_loc = options[std::upper_bound(distribution.begin(), distribution.end(),
                                             std::uniform_real_distribution<>(0., distribution.back())(gen))
-                           - distribution.begin() - 1];
+                           - distribution.begin()];
         assert(curr_loc < location.size());
         solution.push_back({curr_loc, vehicle});
         cap -= location[curr_loc].weight;
+        if (curr_loc != prev_loc)
+            vehicle_dist += location[prev_loc].distance(location[curr_loc]);
         if (curr_loc == 0) {
-            if (prev_loc == 0 and ++vehicle < vehicles.size()) {
-                cap = vehicles[vehicle];
+            if (prev_loc == 0) {
+                if (++vehicle < vehicles.size()) {
+                    cap = vehicles[vehicle];
+                    vehicle_dist = 0;
+                }
             } else {
                 cap = vehicles[vehicle];
             }

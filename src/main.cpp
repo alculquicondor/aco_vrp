@@ -34,7 +34,6 @@ void timer(int=0) {
 
 
 int main(int argc, char **argv) {
-    const int width = 1000, height = 600;
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 	glutInitWindowSize(width, height);

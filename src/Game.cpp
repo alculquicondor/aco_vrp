@@ -1,5 +1,10 @@
 #include "Game.h"
 
+const int width = 1000;
+const int height = 600;
+
+const size_t ants = 20;
+
 
 Game::Game() : training(false), g(nullptr) {
 }
@@ -14,9 +19,9 @@ Game::~Game() {
 void Game::tick() {
     draw();
     if (training) {
-        g->train(1000, 1);
+        g->train(ants, 1);
         ++iterations;
-        if (iterations == 100) {
+        if (iterations == 2000) {
             set_training(false);
         }
     }
@@ -38,6 +43,8 @@ void Game::draw() {
         p.drawRoute(locations[prev], locations[cur.first], cur.second);
         if (cur.first != 0)
             attended += locations[cur.first].weight;
+        else
+            ++col;
         distance += locations[prev].distance(locations[cur.first]);
         prev = cur.first;
     }
@@ -64,12 +71,13 @@ void Game::load_data(std::string filename) {
 
 void Game::set_training(bool ok) {
     if (not training and ok){
-        std::size_t total_weight = 0;
-        for (auto x : locations)
+        double estimated_distance = locations.size() * sqrt(height * height + width * width) / 2;
+        double total_weight = 0;
+        g = new Graph(locations, vehicles, 5e3);
+        for (auto &x : locations)
             total_weight += x.weight;
-        g = new Graph(locations, vehicles);
         iterations = 0;
-        g->train(1000, 1, sqrt(total_weight), true);
+        g->train(ants, 1, Graph::getFitness(total_weight, estimated_distance) / sqrt(ants), true);
     }
     training = ok;
 }

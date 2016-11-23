@@ -24,6 +24,7 @@ private:
     vector<std::size_t> vehicles;
     double **distance, **pheromone, **tmp_pheromone;
     double bestFitness;
+    double maxDist;
     Solution bestSolution;
 
     std::mt19937 gen;
@@ -37,11 +38,13 @@ private:
     void evaporate();
 
 public:
-    Graph(const vector<Location> &location, const vector<size_t> &vehicles);
+    Graph(const vector<Location> &location, const vector<size_t> &vehicles, double maxDist=1e300);
     ~Graph();
 
+    static double getFitness(double total_weight, double total_distance);
+
     void train(int ants, int max_repetitions, double t0=0, bool reset=false);
-    Solution buildSolution();
+    typename Graph::Solution buildSolution();
 
     Solution getBestSolution() const {
         return bestSolution;

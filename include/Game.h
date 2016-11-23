@@ -10,6 +10,9 @@
 
 using std::pair;
 
+extern const int width, height;
+
+extern const size_t ants;
 
 class Game
 {
