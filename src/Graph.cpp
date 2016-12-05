@@ -17,7 +17,7 @@ double Graph::probability(size_t i, size_t j, bool vehicle) {
 
 
 double Graph::getFitness(double total_weight, double total_distance) {
-    return sqrt(total_weight) + (1 + 1 / total_distance);
+    return sqrt(total_weight) * (1 + 1 / total_distance);
 }
 
 
